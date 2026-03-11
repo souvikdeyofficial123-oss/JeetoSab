@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JeetoSab — Win Big · Play Smart</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#080a10; --bg-card:#0e1118; --bg-panel:#0d1016;
+  --bg-tile:#13161f; --bg-hover:#1a1d2a;
+  --accent:#00e701; --accent-g:rgba(0,231,1,0.25);
+  --gold:#f5c518;   --gold-g:rgba(245,197,24,0.30);
+  --red:#ff3b3b;    --red-g:rgba(255,59,59,0.40);
+  --blue:#00c2ff;   --blue-g:rgba(0,194,255,0.30);
+  --border:#1a1d2a; --text:#e8eaf0; --muted:#6b7280; --dim:#2d3347;
+  --radius:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+.page{display:none;min-height:100vh;}
+.page.active{display:flex;flex-direction:column;}
+
+.orb{position:fixed;border-radius:50%;filter:blur(100px);opacity:.08;pointer-events:none;z-index:0;}
+.orb1{width:500px;height:500px;background:var(--gold);top:-150px;right:-150px;animation:orbF 10s ease-in-out infinite;}
+.orb2{width:380px;height:380px;background:var(--accent);bottom:-100px;left:-100px;animation:orbF 12s ease-in-out infinite reverse;}
+.orb3{width:260px;height:260px;background:#7c3aed;top:40%;left:40%;animation:orbF 9s ease-in-out infinite 2s;}
+@keyframes orbF{0%,100%{transform:translate(0,0)}50%{transform:translate(18px,-18px)}}
+#floatWrap{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.fsym{position:absolute;opacity:.04;animation:fsymA linear infinite;}
+@keyframes fsymA{from{transform:translateY(110vh) rotate(0deg);opacity:0;}10%{opacity:.06;}90%{opacity:.06;}to{transform:translateY(-10vh) rotate(360deg);opacity:0;}}
+
+/* SPINNER */
+.spinner-overlay{position:fixed;inset:0;z-index:9999;background:rgba(8,10,16,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;backdrop-filter:blur(6px);}
+.spinner-overlay.hidden{display:none;}
+.spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner-label{font-size:13px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+
+/* LOGIN */
+#loginPage{align-items:center;justify-content:center;padding:16px;position:relative;}
+.login-card{position:relative;z-index:10;background:var(--bg-card);border:1px solid var(--border);border-radius:22px;padding:42px 34px;width:100%;max-width:420px;box-shadow:0 0 80px rgba(0,0,0,.85),0 0 140px rgba(245,197,24,.05);animation:cardIn .55s cubic-bezier(.34,1.56,.64,1);}
+@keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(.96)}to{opacity:1;transform:none}}
+.logo-block{text-align:center;margin-bottom:30px;}
+.logo-emoji{font-size:52px;display:block;margin-bottom:10px;filter:drop-shadow(0 0 18px rgba(245,197,24,.65));animation:iconPulse 2.5s ease-in-out infinite;}
+@keyframes iconPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.09);}}
+.logo-name{font-family:'Cinzel',serif;font-size:34px;font-weight:900;letter-spacing:4px;background:linear-gradient(135deg,#f5c518,#fff8dc,#e0a800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-tag{font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:4px;}
+.tabs{display:flex;background:var(--bg-panel);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:26px;gap:4px;}
+.tab{flex:1;padding:11px;text-align:center;font-weight:700;font-size:14px;letter-spacing:1px;border-radius:9px;cursor:pointer;transition:all .25s;color:var(--muted);text-transform:uppercase;}
+.tab.active{background:var(--gold);color:#000;box-shadow:0 0 16px var(--gold-g);}
+.form-sec{display:none;}.form-sec.active{display:block;}
+.field{margin-bottom:15px;}
+.f-label{display:block;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+.f-wrap{position:relative;display:flex;align-items:center;}
+.f-icon{position:absolute;left:13px;font-size:15px;pointer-events:none;z-index:1;}
+.f-wrap input{width:100%;background:var(--bg-panel);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;padding:13px 44px 13px 40px;outline:none;transition:border-color .2s,box-shadow .2s;}
+.f-wrap input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,197,24,.15);}
+.f-wrap input::placeholder{color:#3d4455;}
+.eye-btn{position:absolute;right:12px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:4px;transition:color .2s;z-index:1;}
+.eye-btn:hover{color:var(--text);}
+.err-box,.suc-box{border-radius:9px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;align-items:center;gap:8px;animation:errIn .3s ease;}
+.err-box{background:rgba(255,77,77,.1);border:1px solid rgba(255,77,77,.3);color:#ff6b6b;}
+.suc-box{background:rgba(0,231,1,.1);border:1px solid rgba(0,231,1,.3);color:var(--accent);}
+.err-box.show,.suc-box.show{display:flex;}
+@keyframes errIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+.sbar{height:3px;background:var(--border);border-radius:3px;margin-top:6px;overflow:hidden;}
+.sfill{height:100%;border-radius:3px;transition:width .3s,background .3s;width:0;}
+.btn-primary{width:100%;padding:15px;background:linear-gradient(135deg,var(--gold),#e0a800);border:none;border-radius:var(--radius);color:#000;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;margin-top:4px;}
+.btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,transparent 100%);}
+.btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 26px var(--gold-g);}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed;}
+.card-foot{text-align:center;margin-top:18px;font-size:11px;color:var(--muted);letter-spacing:1px;}
+.fb-status{display:flex;align-items:center;gap:6px;justify-content:center;margin-top:12px;font-size:11px;letter-spacing:1px;color:var(--muted);}
+.fb-dot{width:7px;height:7px;border-radius:50%;background:#555;transition:background .4s;}
+.fb-dot.ok{background:var(--accent);box-shadow:0 0 6px var(--accent-g);}
+.fb-dot.err{background:var(--red);}
+
+/* HEADER */
+#dashPage header,#minesPage header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:58px;background:rgba(8,10,16,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(14px);}
+.site-logo{font-family:'Cinzel',serif;font-size:19px;font-weight:900;letter-spacing:3px;background:linear-gradient(135deg,#f5c518,#fff8dc,#e0a800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;border:none;background-color:transparent;}
+.bal-chip{display:flex;align-items:center;gap:7px;background:var(--bg-tile);border:1px solid var(--border);border-radius:20px;padding:5px 15px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;}
+.bal-chip .rs{color:var(--gold);}
+.btn-logout{background:transparent;border:1px solid rgba(255,77,77,.3);border-radius:8px;color:#ff6b6b;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;padding:7px 13px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.btn-logout:hover{background:rgba(255,77,77,.1);border-color:#ff4d4d;}
+
+/* DASHBOARD */
+#dashPage{position:relative;}
+.dash-main{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:36px 14px;}
+.welcome{background:linear-gradient(135deg,rgba(245,197,24,.07),rgba(0,231,1,.04));border:1px solid rgba(245,197,24,.18);border-radius:18px;padding:26px 30px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;animation:slideIn .5s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+.welcome h1{font-size:26px;font-weight:700;letter-spacing:1px;}.welcome h1 span{color:var(--gold);}
+.welcome p{color:var(--muted);font-size:14px;margin-top:3px;letter-spacing:1px;}
+.bal-big .lbl{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.bal-big .amt{font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;color:var(--gold);text-shadow:0 0 18px var(--gold-g);}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:13px;padding:16px;text-align:center;animation:cardIn .5s ease both;}
+.stat-card:nth-child(1){animation-delay:.1s}.stat-card:nth-child(2){animation-delay:.2s}.stat-card:nth-child(3){animation-delay:.3s}
+.stat-icon{font-size:22px;margin-bottom:5px;}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);}
+.stat-lbl{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.mines-hero{background:linear-gradient(135deg,#051a10,#0a1a14,#051a10);border:1px solid rgba(0,231,1,.22);border-radius:20px;padding:40px 28px;text-align:center;margin-bottom:28px;position:relative;overflow:hidden;animation:slideIn .5s .15s ease both;}
+.mines-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 50%,rgba(0,231,1,.06) 0%,transparent 70%);pointer-events:none;}
+.hero-icon{font-size:68px;display:block;margin-bottom:14px;filter:drop-shadow(0 0 22px rgba(0,231,1,.55));animation:heroFloat 3.2s ease-in-out infinite;}
+@keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.mines-hero h2{font-size:clamp(24px,5vw,38px);font-weight:800;letter-spacing:4px;color:var(--accent);text-shadow:0 0 22px var(--accent-g);text-transform:uppercase;margin-bottom:8px;}
+.mines-hero p{color:var(--muted);font-size:14px;letter-spacing:1px;margin-bottom:26px;}
+.btn-play{display:inline-block;padding:17px 52px;background:var(--accent);border:none;border-radius:12px;color:#000;font-family:'Rajdhani',sans-serif;font-size:19px;font-weight:800;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;box-shadow:0 0 32px var(--accent-g),0 4px 20px rgba(0,0,0,.4);animation:playPulse 2.5s ease-in-out infinite;}
+@keyframes playPulse{0%,100%{box-shadow:0 0 32px var(--accent-g),0 4px 20px rgba(0,0,0,.4);}50%{box-shadow:0 0 54px rgba(0,231,1,.55),0 4px 28px rgba(0,0,0,.5);}}
+.btn-play::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.2) 0%,transparent 100%);}
+.btn-play:hover{background:#12ff14;transform:translateY(-3px) scale(1.04);}
+.mine-dots{display:flex;gap:7px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
+.mdot{width:26px;height:26px;background:rgba(0,231,1,.07);border:1px solid rgba(0,231,1,.13);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.sec-title{font-size:10px;font-weight:700;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:14px;}
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;}
+.game-card{background:var(--bg-card);border:1px solid var(--border);border-radius:15px;overflow:hidden;cursor:pointer;transition:all .25s;animation:cardIn .5s ease both;}
+.game-card:hover{border-color:rgba(245,197,24,.35);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.5),0 0 28px rgba(245,197,24,.08);}
+.game-thumb{height:110px;display:flex;align-items:center;justify-content:center;font-size:52px;position:relative;overflow:hidden;}
+.glow-ring{position:absolute;width:75px;height:75px;border-radius:50%;border:2px solid;opacity:.2;animation:ringP 2.5s ease-in-out infinite;}
+@keyframes ringP{0%,100%{transform:scale(1);opacity:.2}50%{transform:scale(1.35);opacity:0}}
+.badge{position:absolute;top:8px;right:8px;font-size:9px;font-weight:800;letter-spacing:1px;padding:2px 8px;border-radius:10px;text-transform:uppercase;}
+.badge.hot{background:#ff5500;color:#fff;}.badge.new{background:var(--accent);color:#000;}
+.game-info{padding:13px 15px;}
+.game-name{font-size:16px;font-weight:700;letter-spacing:1px;margin-bottom:2px;}
+.game-desc{font-size:12px;color:var(--muted);}
+
+/* MINES */
+.mines-layout{position:relative;z-index:1;max-width:1060px;margin:0 auto;padding:22px 12px;display:grid;grid-template-columns:255px 1fr;gap:15px;align-items:start;}
+.panel{background:var(--bg-panel);border:1px solid var(--border);border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:15px;position:sticky;top:70px;}
+.p-title{font-size:10px;font-weight:700;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+.inp-group{display:flex;flex-direction:column;gap:6px;}
+.inp-label{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.bet-wrap{display:flex;align-items:center;background:var(--bg-tile);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s,box-shadow .2s;}
+.bet-wrap:focus-within{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-g);}
+.bet-prefix{padding:0 10px;color:var(--gold);font-size:15px;font-weight:700;}
+.bet-input{flex:1;background:transparent;border:none;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;padding:11px 8px 11px 0;outline:none;min-width:0;}
+.bet-input:disabled{opacity:.5;cursor:not-allowed;}
+.btn-row{display:flex;gap:5px;}
+.btn-sm{flex:1;background:var(--bg-tile);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;padding:9px 5px;cursor:pointer;transition:all .15s;letter-spacing:1px;text-align:center;}
+.btn-sm:hover:not(:disabled){background:var(--bg-hover);color:var(--text);}.btn-sm:disabled{opacity:.4;cursor:not-allowed;}
+.mc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
+.mc-btn{background:var(--bg-tile);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;padding:7px 3px;cursor:pointer;text-align:center;transition:all .15s;}
+.mc-btn:hover:not(:disabled){background:var(--bg-hover);color:var(--text);}
+.mc-btn.active{background:rgba(0,231,1,.1);border-color:var(--accent);color:var(--accent);box-shadow:0 0 8px var(--accent-g);}
+.mc-btn:disabled{opacity:.4;cursor:not-allowed;}
+.info-box{background:var(--bg-tile);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;}
+.ib-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;}
+.ib-mult{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--gold);text-shadow:0 0 10px var(--gold-g);transition:all .3s;}
+.ib-profit{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--accent);text-shadow:0 0 10px var(--accent-g);transition:all .3s;}
+.prog-wrap{display:flex;flex-direction:column;gap:6px;}
+.prog-hdr{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-weight:700;letter-spacing:1px;}
+.prog-bar{height:4px;background:var(--bg-tile);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--accent));border-radius:4px;width:0%;transition:width .4s ease;box-shadow:0 0 8px var(--accent-g);}
+.btn-bet{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#00c501);border:none;border-radius:var(--radius);color:#000;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:800;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:all .2s;position:relative;overflow:hidden;}
+.btn-bet::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.16) 0%,transparent 100%);}
+.btn-bet:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 0 28px var(--accent-g),0 4px 16px rgba(0,0,0,.4);}
+.btn-bet:disabled{opacity:.5;cursor:not-allowed;}
+.btn-cashout{width:100%;padding:14px;background:transparent;border:2px solid var(--gold);border-radius:var(--radius);color:var(--gold);font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:800;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:all .2s;animation:coPulse 2s infinite;}
+@keyframes coPulse{0%,100%{box-shadow:0 0 12px var(--gold-g)}50%{box-shadow:0 0 28px rgba(245,197,24,.5)}}
+.btn-cashout:hover{background:rgba(245,197,24,.1);transform:translateY(-2px);}
+.sep{height:1px;background:var(--border);}
+.game-col{display:flex;flex-direction:column;gap:14px;}
+.game-hdr{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.game-title{font-size:22px;font-weight:700;letter-spacing:2px;}.game-title span{color:var(--accent);}
+.pills{display:flex;gap:8px;flex-wrap:wrap;}
+.pill{background:var(--bg-panel);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:1px;}
+.pill b{color:var(--text);}
+.board-wrap{background:var(--bg-panel);border:1px solid var(--border);border-radius:16px;padding:16px;position:relative;}
+.board{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;}
+.tile{aspect-ratio:1;background:var(--bg-tile);border:1px solid var(--border);border-radius:10px;cursor:pointer;position:relative;overflow:hidden;transition:transform .15s,border-color .15s,box-shadow .15s;display:flex;align-items:center;justify-content:center;}
+.tile::before{content:'';position:absolute;inset:0;background:linear-gradient(145deg,rgba(255,255,255,.04) 0%,transparent 60%);pointer-events:none;}
+.tile:hover:not(.revealed):not(.disabled){background:var(--bg-hover);border-color:rgba(0,231,1,.35);box-shadow:0 0 18px rgba(0,231,1,.12);transform:scale(1.05);}
+.tile.disabled{cursor:default;}
+.tile-face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(18px,3.5vw,28px);opacity:0;transform:scale(.3) rotateY(180deg);pointer-events:none;}
+.tile.gem{background:linear-gradient(145deg,#091a2a,#071320);border-color:var(--blue);box-shadow:0 0 18px var(--blue-g),inset 0 0 18px rgba(0,194,255,.06);animation:gemRev .4s cubic-bezier(.34,1.56,.64,1) forwards,gemGlow 2.5s ease infinite .4s;}
+.tile.gem .tile-face{opacity:1;transform:scale(1) rotateY(0deg);transition:all .35s cubic-bezier(.34,1.56,.64,1);}
+@keyframes gemRev{0%{transform:scale(.7)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+@keyframes gemGlow{0%,100%{box-shadow:0 0 18px var(--blue-g)}50%{box-shadow:0 0 32px rgba(0,194,255,.44)}}
+.tile.mine{background:linear-gradient(145deg,#270808,#160404);border-color:var(--red);box-shadow:0 0 18px var(--red-g),inset 0 0 18px rgba(255,59,59,.08);animation:mineRev .3s ease forwards;}
+.tile.mine .tile-face{opacity:1;transform:scale(1) rotateY(0deg);transition:all .25s ease;}
+@keyframes mineRev{0%{transform:scale(1)}30%{transform:scale(1.18)}60%{transform:scale(.94)}100%{transform:scale(1)}}
+.ripple{position:absolute;border-radius:50%;background:rgba(0,231,1,.25);transform:scale(0);animation:ripA .6s linear forwards;pointer-events:none;}
+@keyframes ripA{to{transform:scale(4);opacity:0}}
+.board-ov{position:absolute;inset:0;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:10;backdrop-filter:blur(6px);}
+.board-ov.show{opacity:1;pointer-events:all;}
+.ov-lose{background:rgba(6,2,2,.88);}.ov-win{background:rgba(2,6,2,.88);}
+.ov-title{font-size:clamp(20px,4.5vw,32px);font-weight:800;letter-spacing:4px;}
+.ov-title.lose{color:var(--red);text-shadow:0 0 20px var(--red-g);}
+.ov-title.win{color:var(--accent);text-shadow:0 0 20px var(--accent-g);}
+.ov-sub{color:var(--muted);font-size:13px;letter-spacing:1px;}
+.ov-amt{font-family:'JetBrains Mono',monospace;font-size:clamp(18px,4vw,26px);font-weight:700;color:var(--gold);text-shadow:0 0 14px var(--gold-g);}
+.btn-again{margin-top:8px;padding:10px 26px;background:var(--accent);border:none;border-radius:var(--radius);color:#000;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:800;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:all .2s;}
+.btn-again:hover{background:#12ff14;box-shadow:0 0 20px var(--accent-g);transform:translateY(-2px);}
+.hist-row{display:flex;gap:6px;flex-wrap:wrap;}
+.h-pill{padding:4px 10px;border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;animation:pillIn .3s ease;}
+@keyframes pillIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.h-pill.win{background:rgba(0,231,1,.12);border:1px solid rgba(0,231,1,.25);color:var(--accent);}
+.h-pill.lose{background:rgba(255,59,59,.10);border:1px solid rgba(255,59,59,.25);color:var(--red);}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.shake{animation:shake .4s ease;}
+.burst{position:fixed;pointer-events:none;z-index:999;}
+.bpart{position:absolute;width:8px;height:8px;border-radius:50%;animation:burstA 1.2s ease-out forwards;}
+@keyframes burstA{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0}}
+.cflash{animation:cf .2s ease;}
+@keyframes cf{0%,100%{color:var(--gold)}50%{color:#fff;text-shadow:0 0 20px #fff}}
+.site-footer{text-align:center;padding:22px;color:var(--dim);font-size:11px;letter-spacing:1px;border-top:1px solid var(--border);margin-top:auto;}
+@media(max-width:680px){.mines-layout{grid-template-columns:1fr;}.panel{position:static;}.board{gap:5px;}.stats-row{grid-template-columns:repeat(3,1fr);}.welcome{flex-direction:column;}.bal-big{text-align:left;}}
+@media(max-width:400px){.login-card{padding:28px 18px;}.logo-name{font-size:26px;}.btn-play{padding:14px 30px;font-size:16px;}}
+</style>
+</head>
+<body>
+
+<!-- LOADING SPINNER -->
+<div class="spinner-overlay" id="spinnerOverlay">
+  <div class="spinner"></div>
+  <div class="spinner-label" id="spinnerLabel">Connecting to Firebase...</div>
+</div>
+
+<!-- ANIMATED BG -->
+<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+<div id="floatWrap"></div>
+
+<!-- ════════════════════════════════════
+     PAGE 1 — LOGIN / REGISTER
+════════════════════════════════════ -->
+<div class="page" id="loginPage">
+  <div class="login-card">
+    <div class="logo-block">
+      <span class="logo-emoji">🎰</span>
+      <div class="logo-name">JeetoSab</div>
+      <div class="logo-tag">Win Big · Play Smart</div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" id="tabL" onclick="switchTab('login')">Login</div>
+      <div class="tab"        id="tabR" onclick="switchTab('register')">Register</div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="form-sec active" id="loginForm">
+      <div class="err-box" id="loginErr">⚠ <span id="loginErrTxt"></span></div>
+      <div class="field">
+        <label class="f-label">User ID</label>
+        <div class="f-wrap"><span class="f-icon">👤</span>
+          <input type="text" id="lUserId" placeholder="Enter your User ID" autocomplete="username">
+        </div>
+      </div>
+      <div class="field">
+        <label class="f-label">Password</label>
+        <div class="f-wrap"><span class="f-icon">🔐</span>
+          <input type="password" id="lPass" placeholder="Enter your password" autocomplete="current-password">
+          <button class="eye-btn" onclick="toggleEye('lPass',this)">👁</button>
+        </div>
+      </div>
+      <button class="btn-primary" id="loginBtn" onclick="doLogin()">🎲 Login &amp; Play</button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div class="form-sec" id="regForm">
+      <div class="err-box" id="regErr">⚠ <span id="regErrTxt"></span></div>
+      <div class="suc-box" id="regSuc">✅ Account created! You can now login.</div>
+      <div class="field">
+        <label class="f-label">Choose User ID</label>
+        <div class="f-wrap"><span class="f-icon">👤</span>
+          <input type="text" id="rUserId" placeholder="e.g. lucky_raj123" autocomplete="username">
+        </div>
+      </div>
+      <div class="field">
+        <label class="f-label">Password</label>
+        <div class="f-wrap"><span class="f-icon">🔐</span>
+          <input type="password" id="rPass" placeholder="Min 6 characters" autocomplete="new-password" oninput="pwStrength(this.value)">
+          <button class="eye-btn" onclick="toggleEye('rPass',this)">👁</button>
+        </div>
+        <div class="sbar"><div class="sfill" id="sFill"></div></div>
+      </div>
+      <div class="field">
+        <label class="f-label">Confirm Password</label>
+        <div class="f-wrap"><span class="f-icon">🔑</span>
+          <input type="password" id="rConf" placeholder="Re-enter password" autocomplete="new-password">
+          <button class="eye-btn" onclick="toggleEye('rConf',this)">👁</button>
+        </div>
+      </div>
+      <button class="btn-primary" id="regBtn" onclick="doRegister()">🎰 Create Account</button>
+    </div>
+
+    <div class="card-foot">🔒 Secure · 18+ Only · Responsible Gaming</div>
+    <div class="fb-status">
+      <div class="fb-dot" id="fbDot"></div>
+      <span id="fbTxt">Connecting to Firebase...</span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE 2 — DASHBOARD
+════════════════════════════════════ -->
+<div class="page" id="dashPage">
+  <header>
+    <button class="site-logo" onclick="showPage('dash')">JeetoSab</button>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="bal-chip"><span class="rs">₹</span><span id="dashBal">1,000.00</span></div>
+      <button class="btn-logout" onclick="doLogout()">⏻ Logout</button>
+    </div>
+  </header>
+  <div class="dash-main">
+    <div class="welcome">
+      <div>
+        <h1>Welcome back, <span id="dashUser">Player</span>! 🎉</h1>
+        <p>Your lucky streak awaits. Ready to win?</p>
+      </div>
+      <div class="bal-big">
+        <div class="lbl">Your Balance</div>
+        <div class="amt">₹<span id="dashBalBig">1,000.00</span></div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-val" id="dashDays">1</div><div class="stat-lbl">Days Member</div></div>
+      <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-val" id="dashBalStat">₹1000</div><div class="stat-lbl">Balance</div></div>
+      <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-val">Bronze</div><div class="stat-lbl">VIP Level</div></div>
+    </div>
+    <div class="mines-hero">
+      <span class="hero-icon">💣</span>
+      <h2>Play Mines</h2>
+      <p>Reveal gems, avoid bombs. Higher risk → bigger reward.</p>
+      <button class="btn-play" onclick="showPage('mines')">💎 Play Mines Now</button>
+      <div class="mine-dots">
+        <div class="mdot">💎</div><div class="mdot">💣</div><div class="mdot">💎</div>
+        <div class="mdot">💎</div><div class="mdot">💣</div><div class="mdot">💎</div>
+        <div class="mdot">💣</div><div class="mdot">💎</div><div class="mdot">💎</div>
+      </div>
+    </div>
+    <div class="sec-title">More Games</div>
+    <div class="games-grid">
+      <div class="game-card"><div class="game-thumb" style="background:linear-gradient(135deg,#0d1a2e,#1a0d2e)"><span>🎰</span><div class="glow-ring" style="border-color:#7c3aed"></div><div class="badge hot">HOT</div></div><div class="game-info"><div class="game-name">Slots</div><div class="game-desc">Spin to win big</div></div></div>
+      <div class="game-card"><div class="game-thumb" style="background:linear-gradient(135deg,#1a0d0d,#2e1a0d)"><span>🎲</span><div class="glow-ring" style="border-color:var(--gold)"></div><div class="badge new">NEW</div></div><div class="game-info"><div class="game-name">Dice</div><div class="game-desc">Over / Under</div></div></div>
+      <div class="game-card"><div class="game-thumb" style="background:linear-gradient(135deg,#0d1a0d,#1a2e0d)"><span>🃏</span><div class="glow-ring" style="border-color:var(--blue)"></div></div><div class="game-info"><div class="game-name">Blackjack</div><div class="game-desc">Beat the dealer</div></div></div>
+      <div class="game-card"><div class="game-thumb" style="background:linear-gradient(135deg,#1a1a0d,#2e2a0d)"><span>🎯</span><div class="glow-ring" style="border-color:#ff6b6b"></div></div><div class="game-info"><div class="game-name">Plinko</div><div class="game-desc">Drop &amp; win</div></div></div>
+    </div>
+  </div>
+  <footer class="site-footer">🔒 JeetoSab · 18+ · Responsible Gaming · Powered by Firebase</footer>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE 3 — MINES GAME
+════════════════════════════════════ -->
+<div class="page" id="minesPage">
+  <header>
+    <button class="site-logo" onclick="showPage('dash')">JeetoSab</button>
+    <div style="font-size:15px;font-weight:700;letter-spacing:2px;color:var(--muted)">⬡ <span style="color:var(--accent)">Mines</span></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="bal-chip"><span class="rs">₹</span><span id="minesBal">1,000.00</span></div>
+      <button class="btn-sm" style="flex:none;padding:7px 14px" onclick="showPage('dash')">← Back</button>
+    </div>
+  </header>
+  <div class="mines-layout">
+    <aside class="panel">
+      <div class="p-title">Game Settings</div>
+      <div class="inp-group">
+        <div class="inp-label">Bet Amount</div>
+        <div class="bet-wrap"><span class="bet-prefix">₹</span><input type="number" class="bet-input" id="betInput" value="10" min="1"></div>
+        <div class="btn-row">
+          <button class="btn-sm" id="halfBtn">½</button>
+          <button class="btn-sm" id="dblBtn">2×</button>
+          <button class="btn-sm" id="maxBtn">Max</button>
+        </div>
+      </div>
+      <div class="sep"></div>
+      <div class="inp-group">
+        <div class="inp-label">Mines — <span id="mcLabel" style="color:var(--accent)">3</span></div>
+        <div class="mc-grid" id="mcGrid"></div>
+      </div>
+      <div class="sep"></div>
+      <div class="info-box">
+        <div><div class="ib-lbl">Multiplier</div><div class="ib-mult" id="multDisp">1.00×</div></div>
+        <div style="text-align:right"><div class="ib-lbl">Profit</div><div class="ib-profit" id="profitDisp">₹0.00</div></div>
+      </div>
+      <div class="prog-wrap" id="progWrap" style="display:none">
+        <div class="prog-hdr"><span>SAFE TILES</span><span id="progTxt">0 / 0</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+      </div>
+      <button class="btn-bet" id="betBtn" onclick="startGame()">🎲 Place Bet</button>
+      <button class="btn-cashout" id="cashoutBtn" style="display:none" onclick="cashOut()">💰 Cash Out ₹<span id="cashAmt">0.00</span></button>
+    </aside>
+    <div class="game-col">
+      <div class="game-hdr">
+        <div class="game-title">💣 <span>Mines</span></div>
+        <div class="pills">
+          <div class="pill" id="gemPill" style="display:none">💎 <b id="gemsN">0</b> found</div>
+          <div class="pill">💣 <b id="minesBadge">3</b> mines</div>
+        </div>
+      </div>
+      <div class="board-wrap" id="boardWrap">
+        <div class="board" id="board"></div>
+        <div class="board-ov ov-lose" id="loseOv">
+          <div class="ov-title lose">💥 MINE HIT!</div>
+          <div class="ov-sub">Better luck next time</div>
+          <div class="ov-amt" id="loseAmt">-₹10.00</div>
+          <button class="btn-again" onclick="resetMinesUI()">Play Again</button>
+        </div>
+        <div class="board-ov ov-win" id="winOv">
+          <div class="ov-title win">💎 CASHED OUT!</div>
+          <div class="ov-sub">Profit secured! 🎉</div>
+          <div class="ov-amt" id="winAmt">+₹0.00</div>
+          <button class="btn-again" onclick="resetMinesUI()">Play Again</button>
+        </div>
+      </div>
+      <div>
+        <div class="p-title" style="margin-bottom:8px">Recent Games</div>
+        <div class="hist-row" id="histRow"><span style="color:var(--dim);font-size:12px;font-style:italic">No games yet...</span></div>
+      </div>
+    </div>
+  </div>
+  <footer class="site-footer">🔒 JeetoSab · 18+ · Responsible Gaming</footer>
+</div>
+
+<!-- ════════════════════════════════════
+     FIREBASE SDK v10 (ES Module)
+════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, get, update, child }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+/* ─── Firebase Config ─── */
+const firebaseConfig = {
+  apiKey:            "AIzaSyAFQoCPY8vjxsQhUx8faDDZ_lg9nqM-shw",
+  authDomain:        "jeeto-477e7.firebaseapp.com",
+  databaseURL:       "https://jeeto-477e7-default-rtdb.firebaseio.com",
+  projectId:         "jeeto-477e7",
+  storageBucket:     "jeeto-477e7.firebasestorage.app",
+  messagingSenderId: "324212042994",
+  appId:             "1:324212042994:web:64c8ddf3a203e3d51af46b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+/* ─── Helpers ─── */
+const sanitize = uid => uid.replace(/[.#$\[\]\/]/g, '_');
+const fmtINR   = n   => (n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const getDevice= ()  => /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : /iPad|Tablet/i.test(navigator.userAgent) ? 'Tablet' : 'Desktop';
+
+/* ─── Firebase status indicator ─── */
+function setFbStatus(state) {
+  const dot = document.getElementById('fbDot');
+  const txt = document.getElementById('fbTxt');
+  if (state==='ok')  { dot.className='fb-dot ok';  txt.textContent='Firebase Connected ✓'; }
+  if (state==='err') { dot.className='fb-dot err'; txt.textContent='Firebase Error — check config'; }
+}
+
+/* ════════════════════════════════════
+   saveUser() — writes to Firebase "users" node
+════════════════════════════════════ */
+async function saveUser(userId, password, balance = 1000) {
+  const key      = sanitize(userId);
+  const userData = {
+    userId,
+    password:   btoa(password),
+    balance,
+    signupDate: new Date().toISOString(),
+    deviceType: getDevice()
+  };
+  await set(ref(db, 'users/' + key), userData);
+  return userData;
+}
+
+/* ─── getUser() ─── */
+async function getUser(userId) {
+  const snap = await get(child(ref(db), 'users/' + sanitize(userId)));
+  return snap.exists() ? snap.val() : null;
+}
+
+/* ─── updateBalance() — syncs balance after every game ─── */
+async function updateBalance(userId, newBalance) {
+  await update(ref(db, 'users/' + sanitize(userId)), { balance: newBalance });
+}
+
+/* ─── Session (localStorage — only stores userId, not password) ─── */
+const getSession  = ()    => { try { return JSON.parse(localStorage.getItem('js_sess')); } catch{ return null; } };
+const setSession  = uid   => localStorage.setItem('js_sess', JSON.stringify({ userId: uid, t: Date.now() }));
+const clearSession= ()    => localStorage.removeItem('js_sess');
+
+/* ════════════════════════════════════
+   FLOATING SYMBOLS
+════════════════════════════════════ */
+const SYMS = ['🃏','🎲','🎰','💎','♠','♥','♦','♣','🍀','⭐','🎯','💣'];
+const fw   = document.getElementById('floatWrap');
+for (let i=0; i<18; i++) {
+  const el = document.createElement('div');
+  el.className='fsym';
+  el.textContent = SYMS[Math.floor(Math.random()*SYMS.length)];
+  el.style.cssText=`left:${Math.random()*100}%;font-size:${18+Math.random()*28}px;animation-duration:${9+Math.random()*14}s;animation-delay:${Math.random()*12}s`;
+  fw.appendChild(el);
+}
+
+/* ════════════════════════════════════
+   SPA ROUTER
+════════════════════════════════════ */
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById({login:'loginPage',dash:'dashPage',mines:'minesPage'}[name]).classList.add('active');
+  window.scrollTo(0,0);
+  if (name==='dash')  refreshDash();
+  if (name==='mines') initMinesPage();
+}
+window.showPage = showPage;
+
+/* ════════════════════════════════════
+   STARTUP — connect Firebase then route
+════════════════════════════════════ */
+(async function boot() {
+  const overlay = document.getElementById('spinnerOverlay');
+  const label   = document.getElementById('spinnerLabel');
+
+  try {
+    label.textContent = 'Connecting to Firebase...';
+    await get(ref(db, '.info/connected'));   // quick ping
+    setFbStatus('ok');
+  } catch(e) {
+    setFbStatus('err');
+  }
+
+  overlay.classList.add('hidden');
+
+  const sess = getSession();
+  if (sess?.userId) {
+    const ud = await getUser(sess.userId);
+    if (ud) { showPage('dash'); return; }
+    clearSession();
+  }
+  showPage('login');
+})();
+
+/* ════════════════════════════════════
+   LOGIN PAGE
+════════════════════════════════════ */
+window.switchTab = function(tab) {
+  ['loginForm','regForm'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  ['tabL','tabR'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.querySelectorAll('.err-box,.suc-box').forEach(e=>e.classList.remove('show'));
+  if (tab==='login')    { document.getElementById('loginForm').classList.add('active'); document.getElementById('tabL').classList.add('active'); }
+  else                  { document.getElementById('regForm').classList.add('active');   document.getElementById('tabR').classList.add('active'); }
+};
+
+window.toggleEye = function(id, btn) {
+  const el=document.getElementById(id);
+  el.type = el.type==='password' ? 'text' : 'password';
+  btn.textContent = el.type==='password' ? '👁' : '🙈';
+};
+
+window.pwStrength = function(val) {
+  let s=0;
+  if(val.length>=6)s++;if(val.length>=10)s++;
+  if(/[A-Z]/.test(val))s++;if(/[0-9]/.test(val))s++;if(/[^A-Za-z0-9]/.test(val))s++;
+  const fill=document.getElementById('sFill');
+  fill.style.width=(s/5*100)+'%';
+  fill.style.background=['#ff4d4d','#ff8c00','#f5c518','#7ed321','#00e701'][Math.min(s-1,4)]||'#333';
+};
+
+function showErr(id, msg) {
+  document.getElementById(id+'ErrTxt').textContent = msg;
+  document.getElementById(id+'Err').classList.add('show');
+}
+
+window.doLogin = async function() {
+  document.querySelectorAll('.err-box').forEach(e=>e.classList.remove('show'));
+  const uid = document.getElementById('lUserId').value.trim();
+  const pw  = document.getElementById('lPass').value;
+  if (!uid||!pw) { showErr('login','Please fill in all fields.'); return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.textContent='⏳ Checking...'; btn.disabled=true;
+
+  try {
+    const ud = await getUser(uid);
+    if (!ud)                         { showErr('login','User ID not found. Please register.'); }
+    else if (ud.password !== btoa(pw)){ showErr('login','Incorrect password. Try again.'); }
+    else {
+      setSession(uid);
+      btn.textContent='✅ Logging in...';
+      setTimeout(()=>{ btn.textContent='🎲 Login & Play'; btn.disabled=false; showPage('dash'); }, 700);
+      return;
+    }
+  } catch(e) {
+    showErr('login','Connection error. Check internet & try again.');
+  }
+  btn.textContent='🎲 Login & Play'; btn.disabled=false;
+};
+
+window.doRegister = async function() {
+  document.querySelectorAll('.err-box,.suc-box').forEach(e=>e.classList.remove('show'));
+  const uid  = document.getElementById('rUserId').value.trim();
+  const pw   = document.getElementById('rPass').value;
+  const conf = document.getElementById('rConf').value;
+
+  if (!uid||!pw||!conf) { showErr('reg','Please fill all fields.'); return; }
+  if (uid.length<4)     { showErr('reg','User ID must be at least 4 characters.'); return; }
+  if (pw.length<6)      { showErr('reg','Password must be at least 6 characters.'); return; }
+  if (pw!==conf)        { showErr('reg','Passwords do not match.'); return; }
+
+  const btn = document.getElementById('regBtn');
+  btn.textContent='⏳ Saving to Firebase...'; btn.disabled=true;
+
+  try {
+    const existing = await getUser(uid);
+    if (existing) { showErr('reg','This User ID is already taken. Try another.'); btn.textContent='🎰 Create Account'; btn.disabled=false; return; }
+
+    await saveUser(uid, pw, 1000);   // ← saveUser() pushes to Firebase
+
+    document.getElementById('regSuc').classList.add('show');
+    setTimeout(()=>{
+      window.switchTab('login');
+      document.getElementById('lUserId').value = uid;
+      btn.textContent='🎰 Create Account'; btn.disabled=false;
+    }, 1600);
+  } catch(e) {
+    showErr('reg','Firebase error: '+e.message);
+    btn.textContent='🎰 Create Account'; btn.disabled=false;
+  }
+};
+
+document.addEventListener('keydown', e=>{
+  if (e.key!=='Enter') return;
+  const active=document.querySelector('.form-sec.active');
+  if (!active) return;
+  active.id==='loginForm' ? window.doLogin() : window.doRegister();
+});
+
+/* ════════════════════════════════════
+   DASHBOARD
+════════════════════════════════════ */
+async function refreshDash() {
+  const sess=getSession(); if(!sess) return;
+  const ud=await getUser(sess.userId); if(!ud) return;
+  const bal=ud.balance??1000;
+  document.getElementById('dashUser').textContent    = sess.userId;
+  document.getElementById('dashBal').textContent     = fmtINR(bal);
+  document.getElementById('dashBalBig').textContent  = fmtINR(bal);
+  document.getElementById('dashBalStat').textContent = '₹'+Math.round(bal);
+  if (ud.signupDate) {
+    const days=Math.max(1,Math.floor((Date.now()-new Date(ud.signupDate))/86400000));
+    document.getElementById('dashDays').textContent=days;
+  }
+}
+
+window.doLogout = function() { clearSession(); showPage('login'); };
+
+/* ════════════════════════════════════
+   MINES GAME
+════════════════════════════════════ */
+let mBalance=1000, mUserId='', betAmt=10, mineCount=3;
+let gameActive=false, boardData=[], gemsRevealed=0, currentMult=1, mHistory=[];
+const TOTAL=25, safeTiles=()=>TOTAL-mineCount;
+
+function calcMult(g,m){
+  if(g===0) return 1;
+  const s=25-m; let p=1;
+  for(let i=0;i<g;i++) p*=(s-i)/(25-i);
+  return Math.max(1.01,(1/p)*0.97);
+}
+
+async function initMinesPage(){
+  const sess=getSession(); if(!sess){showPage('login');return;}
+  mUserId=sess.userId;
+  const ud=await getUser(mUserId); mBalance=ud?.balance??1000;
+  buildMcGrid(); buildBoard(); updateMinesBal(); updateInfo(); resetMinesUI();
+}
+
+function buildMcGrid(){
+  const g=document.getElementById('mcGrid'); g.innerHTML='';
+  for(let i=1;i<=24;i++){
+    const b=document.createElement('button');
+    b.className='mc-btn'+(i===mineCount?' active':''); b.textContent=i;
+    b.onclick=()=>{
+      if(gameActive) return;
+      mineCount=i;
+      document.getElementById('minesBadge').textContent=i;
+      document.getElementById('mcLabel').textContent=i;
+      document.querySelectorAll('.mc-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); updateInfo();
+    };
+    g.appendChild(b);
+  }
+}
+
+function buildBoard(){
+  const el=document.getElementById('board'); el.innerHTML=''; boardData=[];
+  for(let i=0;i<TOTAL;i++){
+    boardData.push({mine:false,revealed:false});
+    const t=document.createElement('div'); t.className='tile';
+    const f=document.createElement('div'); f.className='tile-face';
+    t.appendChild(f); t.onclick=ev=>handleClick(i,ev); el.appendChild(t);
+  }
+}
+
+function placeMines(){
+  boardData.forEach(t=>t.mine=false);
+  const pos=[];
+  while(pos.length<mineCount){const r=Math.floor(Math.random()*TOTAL);if(!pos.includes(r))pos.push(r);}
+  pos.forEach(p=>boardData[p].mine=true);
+}
+
+window.startGame = function(){
+  betAmt=parseFloat(document.getElementById('betInput').value)||10;
+  if(betAmt<=0){doShake(document.getElementById('betInput'));return;}
+  if(betAmt>mBalance){doShake(document.getElementById('betInput'));document.getElementById('betInput').value=mBalance.toFixed(2);return;}
+  mBalance-=betAmt; updateMinesBal();
+  buildBoard(); placeMines(); gemsRevealed=0; currentMult=1; gameActive=true;
+  document.getElementById('betBtn').style.display='none';
+  document.getElementById('cashoutBtn').style.display='block';
+  setInputs(true);
+  document.getElementById('loseOv').classList.remove('show');
+  document.getElementById('winOv').classList.remove('show');
+  document.getElementById('progWrap').style.display='block';
+  document.getElementById('gemPill').style.display='inline-flex';
+  document.getElementById('gemsN').textContent='0';
+  updateInfo(); updateProg(); updateCashout();
+};
+
+function handleClick(idx,ev){
+  if(!gameActive) return;
+  const tile=boardData[idx]; if(tile.revealed) return;
+  tile.revealed=true;
+  const el=document.getElementById('board').children[idx];
+  el.classList.add('revealed','disabled'); addRipple(el,ev);
+  if(tile.mine){
+    el.classList.add('mine'); el.querySelector('.tile-face').textContent='💣';
+    revealMines(); endGame(false);
+  } else {
+    gemsRevealed++; el.classList.add('gem'); el.querySelector('.tile-face').textContent='💎';
+    document.getElementById('gemsN').textContent=gemsRevealed;
+    currentMult=calcMult(gemsRevealed,mineCount);
+    updateInfo(); updateProg(); updateCashout();
+    if(gemsRevealed===safeTiles()){revealMines();endGame(true);}
+  }
+}
+
+function revealMines(){
+  const boardEl=document.getElementById('board');
+  boardData.forEach((t,i)=>{
+    if(t.mine&&!t.revealed) setTimeout(()=>{
+      const el=boardEl.children[i];
+      el.classList.add('mine','revealed','disabled');
+      el.querySelector('.tile-face').textContent='💣';
+    },Math.random()*500);
+  });
+}
+
+async function endGame(won){
+  gameActive=false;
+  document.querySelectorAll('.tile').forEach(t=>t.classList.add('disabled'));
+  document.getElementById('betBtn').style.display='block';
+  document.getElementById('cashoutBtn').style.display='none';
+  setInputs(false);
+  if(won){
+    const payout=betAmt*currentMult, profit=payout-betAmt;
+    mBalance+=payout; updateMinesBal();
+    document.getElementById('winAmt').textContent=`+₹${profit.toFixed(2)}`;
+    document.getElementById('winOv').classList.add('show');
+    doBurst(); addHist(true,`+₹${profit.toFixed(2)}`);
+  } else {
+    document.getElementById('loseAmt').textContent=`-₹${betAmt.toFixed(2)}`;
+    doShake(document.getElementById('boardWrap'));
+    document.getElementById('loseOv').classList.add('show');
+    addHist(false,`-₹${betAmt.toFixed(2)}`);
+  }
+  // ── Sync updated balance to Firebase ──
+  try { await updateBalance(mUserId, mBalance); }
+  catch(e){ console.warn('Balance sync error:', e.message); }
+}
+
+window.cashOut    = ()=>{ if(!gameActive||gemsRevealed===0)return; revealMines(); endGame(true); };
+window.resetMinesUI = ()=>{
+  document.getElementById('loseOv').classList.remove('show');
+  document.getElementById('winOv').classList.remove('show');
+  document.getElementById('progWrap').style.display='none';
+  document.getElementById('gemPill').style.display='none';
+  updateInfo();
+};
+
+function updateMinesBal(){ document.getElementById('minesBal').textContent=fmtINR(mBalance); }
+function updateInfo(){
+  const m=gameActive?currentMult:calcMult(1,mineCount);
+  const el=document.getElementById('multDisp');
+  el.textContent=m.toFixed(2)+'×'; el.classList.add('cflash');
+  setTimeout(()=>el.classList.remove('cflash'),200);
+  document.getElementById('profitDisp').textContent='₹'+(gameActive?(betAmt*currentMult-betAmt):0).toFixed(2);
+}
+function updateCashout(){ document.getElementById('cashAmt').textContent=(betAmt*currentMult).toFixed(2); }
+function updateProg(){
+  const s=safeTiles();
+  document.getElementById('progFill').style.width=(gemsRevealed/s*100)+'%';
+  document.getElementById('progTxt').textContent=`${gemsRevealed} / ${s}`;
+}
+function addHist(won,label){
+  mHistory.unshift({won,label}); if(mHistory.length>14)mHistory.pop();
+  document.getElementById('histRow').innerHTML=mHistory.map(h=>`<div class="h-pill ${h.won?'win':'lose'}">${h.label}</div>`).join('');
+}
+function addRipple(el,ev){
+  const r=document.createElement('div'); r.className='ripple';
+  const rect=el.getBoundingClientRect(),sz=Math.max(rect.width,rect.height);
+  r.style.cssText=`width:${sz}px;height:${sz}px;left:${(rect.width-sz)/2}px;top:${(rect.height-sz)/2}px`;
+  el.appendChild(r); setTimeout(()=>r.remove(),600);
+}
+function doShake(el){ el.classList.add('shake'); setTimeout(()=>el.classList.remove('shake'),400); }
+function doBurst(){
+  const cols=['#00e701','#00c2ff','#f5c518','#ff6b6b','#c084fc'];
+  const b=document.createElement('div'); b.className='burst';
+  b.style.cssText='left:50%;top:40%;transform:translate(-50%,-50%)';
+  document.body.appendChild(b);
+  for(let i=0;i<52;i++){
+    const p=document.createElement('div'); p.className='bpart';
+    const a=(i/52)*360, d=80+Math.random()*150;
+    p.style.cssText=`background:${cols[i%cols.length]};--tx:${Math.cos(a*Math.PI/180)*d}px;--ty:${Math.sin(a*Math.PI/180)*d}px;left:${Math.random()*40-20}px;top:${Math.random()*40-20}px;animation-delay:${Math.random()*.15}s`;
+    b.appendChild(p);
+  }
+  setTimeout(()=>b.remove(),1500);
+}
+function setInputs(d){
+  ['betInput','halfBtn','dblBtn','maxBtn'].forEach(id=>document.getElementById(id).disabled=d);
+  document.querySelectorAll('.mc-btn').forEach(b=>b.disabled=d);
+}
+
+document.getElementById('halfBtn').onclick=()=>{ document.getElementById('betInput').value=Math.max(1,parseFloat(document.getElementById('betInput').value)/2).toFixed(2); };
+document.getElementById('dblBtn').onclick =()=>{ document.getElementById('betInput').value=Math.min(mBalance,parseFloat(document.getElementById('betInput').value)*2).toFixed(2); };
+document.getElementById('maxBtn').onclick =()=>{ document.getElementById('betInput').value=mBalance.toFixed(2); };
+
+</script>
+</body>
+</html>
